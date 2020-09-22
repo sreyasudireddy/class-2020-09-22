@@ -1,6 +1,6 @@
 ---
 title: "Week 3"
-author: "David Kane"
+author: "Sreya Sudireddy"
 output: html_document
 ---
 
@@ -40,16 +40,39 @@ sep_old <-
          title = course_title,
          name = course_name,
          department = course_department) %>% 
+  group_by(id, name, title, department) %>%
+  summarize(u_grad = sum(u_grad), .groups = "drop") %>%
   filter(u_grad > 10)
+
+sep_old
 
 # But this is not correct! Look for Gov 50: Data. What do you see? What can you
 # do to clean it up?
+#add group_by() to keep same columns and combine the one (u_grad) that differed
 ```
 
 
 ### Scene 1
 
 **Prompt:** Read in and clean the new data, creating an object called `sep_new`. 
+```{r}
+sep_new <- 
+  read_excel("new_data/class_enrollment_summary_by_term_9-22-2020.xlsx", 
+             skip = 3) %>% 
+  clean_names() %>%
+    filter(! is.na(course_title)) %>% 
+  select(-grad, -non_degree, -x_reg, -vus, -employee, 
+         -withdraw, -total, -instructor_full_name, -course_section_code) %>%
+  rename(id = course_id,
+         title = course_title,
+         name = course_name,
+         department = course_department) %>% 
+  group_by(id, name, title, department) %>%
+  summarize(u_grad = sum(u_grad), .groups = "drop") %>%
+  filter(u_grad > 10)
+sep_new
+
+```
 
 
 
@@ -59,17 +82,38 @@ sep_old <-
 
 
 Before we start on the model, Wisdom suggests we should:
-
-
-
+```{r}
+#Be mindful of underenrollment, which we can assume why some classes might have been dropped
+#Situated in a global pandemic, some students may have originally enrolled in classes, but then decided to take a leave of absence
+#Focusing on undergrad enrollment, not grad enrollment
+```
 
 After we have a model, Temperance suggests we should:
+```{r}
+#Being mindful of all the reasons why someone would drop enrollment, but not really know each individual's reasons why.
+```
 
 
 
 ### Scene 3
 
 **Prompt:** Which classes had the biggest increases and decreases in undergraduate enrollments between September 1 and today? Make a graphic that shows the 5 biggest increases and decreases. Make it look nice.
+
+```{r}
+sep_comp <- inner_join (sep_new, sep_old, by = c("id", "name", "title", "department")) %>%
+  mutate(u_grad_diff = u_grad.x - u_grad.y) %>%
+  arrange(u_grad_diff) %>%
+  slice(c(1:5, 412:416)) 
+
+#sep_increases <- sep_comb %>%
+  
+
+sep_comb
+ 
+
+  
+#ggplot(aes())
+```
 
 
 
